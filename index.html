@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Betting Game</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(to bottom, #f0fdf4, #ffffff);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      font-family: 'Poppins', sans-serif;
+      padding: 1rem;
+    }
+    .card {
+      background: #ffffff;
+      border-radius: 4px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+      animation: slideUp 0.5s ease-in;
+    }
+    .result-box {
+      background: #f3f4f6;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+    .result-box.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .result-box.hidden {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    .game-btn {
+      background: #16a34a;
+      transition: all 0.3s ease;
+    }
+    .game-btn:hover {
+      transform: scale(1.05);
+      background: #15803d;
+    }
+    .menu-item {
+      transition: all 0.2s ease;
+    }
+    .menu-item:hover {
+      background: #16a34a;
+      color: white;
+    }
+    input, select {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid #d1d5db;
+      transition: all 0.3s ease;
+    }
+    input:focus, select:focus {
+      border-bottom: 2px solid #16a34a;
+      outline: none;
+    }
+    footer {
+      color: #6b7280;
+      font-size: 0.8rem;
+      text-align: center;
+      padding: 1rem 0;
+      width: 100%;
+    }
+    .slot-reel, .mine-cell {
+      width: 60px;
+      height: 60px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+    .slot-reel.spinning {
+      animation: spin 0.5s ease-in-out;
+    }
+    .mine-cell.revealed {
+      animation: fadeIn 0.3s ease-in;
+    }
+    .mine-cell.mine {
+      animation: shake 0.3s ease-in-out;
+    }
+    canvas.crash {
+      animation: shake 0.3s ease-in-out;
+    }
+    .crash-history {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      padding: 1rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    @keyframes spin {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-20px); opacity: 0.5; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-5px) rotate(-5deg); }
+      50% { transform: translateX(5px) rotate(5deg); }
+      75% { transform: translateX(-5px) rotate(-5deg); }
+      100% { transform: translateX(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @media (max-width: 640px) {
+      h1 {
+        font-size: 2rem;
+      }
+      p {
+        font-size: 0.9rem;
+      }
+      .card {
+        padding: 1.25rem;
+      }
+      input, select {
+        padding: 0.5rem 0;
+      }
+      .menu-item {
+        padding: 0.5rem;
+      }
+      .slot-reel, .mine-cell {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+      }
+      canvas {
+        width: 250px !important;
+        height: 150px !important;
+      }
+      .crash-history {
+        padding: 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body class="text-gray-900">
+  <div class="max-w-md w-full mx-auto text-center p-6">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-semibold">Simple Betting Game</h1>
+      <div id="balance" class="text-lg font-medium">Stake Coins: 1000</div>
+    </div>
+
+    <div class="flex justify-center space-x-4 mb-6">
+      <button class="menu-item px-4 py-2 rounded-md text-gray-700" onclick="selectGame('crash')">🚀 Crash</button>
+      <button class="menu-item px-4 py-2 rounded-md text-gray-700" onclick="selectGame('mines')">💣 Mines</button>
+      <button class="menu-item px-4 py-2 rounded-md text-gray-700" onclick="selectGame('slots')">🎰 Slots</button>
+    </div>
+
+    <div id="gameArea" class="card p-6 hidden">
+      <div id="crashGame" class="game-content hidden">
+        <h2 class="text-xl font-semibold mb-4">Crash</h2>
+        <p class="text-sm mb-4 text-gray-600">Rút tiền trước khi vỡ để nhận thưởng!</p>
+        <div class="mb-4">
+          <label for="crashBet" class="block text-left text-sm font-medium mb-1 text-gray-700">Số tiền cược</label>
+          <input type="number" id="crashBet" min="1" class="w-full p-2 text-gray-900 placeholder-gray-500" placeholder="Ví dụ: 10">
+        </div>
+        <canvas id="crashGraph" width="300" height="200" class="mb-4"></canvas>
+        <div id="crashMultiplier" class="text-2xl font-semibold text-green-600 mb-4">1.00x</div>
+        <div class="flex justify-between">
+          <button id="crashStartBtn" class="game-btn text-white px-6 py-2 rounded-md font-medium w-1/2 mr-2" onclick="startCrash()">Bắt đầu</button>
+          <button id="crashCashoutBtn" class="game-btn text-white px-6 py-2 rounded-md font-medium w-1/2 ml-2 hidden" onclick="cashoutCrash()">Rút tiền</button>
+        </div>
+        <div class="crash-history mt-4">
+          <h3 class="text-base font-semibold mb-2">Lịch sử Crash</h3>
+          <ul id="crashHistory" class="text-sm text-gray-600"></ul>
+        </div>
+      </div>
+
+      <div id="minesGame" class="game-content hidden">
+        <h2 class="text-xl font-semibold mb-4">Mines</h2>
+        <p class="text-sm mb-4 text-gray-600">Chọn số mìn, mở ô để tìm kim cương. Rút tiền bất kỳ lúc nào!</p>
+        <div class="mb-4">
+          <label for="minesBet" class="block text-left text-sm font-medium mb-1 text-gray-700">Số tiền cược</label>
+          <input type="number" id="minesBet" min="1" class="w-full p-2 text-gray-900 placeholder-gray-500" placeholder="Ví dụ: 10">
+        </div>
+        <div class="mb-4">
+          <label for="minesCount" class="block text-left text-sm font-medium mb-1 text-gray-700">Số mìn (1-24)</label>
+          <input type="number" id="minesCount" min="1" max="24" class="w-full p-2 text-gray-900 placeholder-gray-500" placeholder="Ví dụ: 5">
+        </div>
+        <div class="grid grid-cols-5 gap-2 mb-4">
+          <div id="mine1" class="mine-cell" onclick="revealCell(1)">1</div>
+          <div id="mine2" class="mine-cell" onclick="revealCell(2)">2</div>
+          <div id="mine3" class="mine-cell" onclick="revealCell(3)">3</div>
+          <div id="mine4" class="mine-cell" onclick="revealCell(4)">4</div>
+          <div id="mine5" class="mine-cell" onclick="revealCell(5)">5</div>
+          <div id="mine6" class="mine-cell" onclick="revealCell(6)">6</div>
+          <div id="mine7" class="mine-cell" onclick="revealCell(7)">7</div>
+          <div id="mine8" class="mine-cell" onclick "revealCell(8)">8</div>
+          <div id="mine9" class="mine-cell" onclick="revealCell(9)">9</div>
+          <div id="mine10" class="mine-cell" onclick="revealCell(10)">10</div>
+          <div id="mine11" class="mine-cell" onclick="revealCell(11)">11</div>
+          <div id="mine12" class="mine-cell" onclick="revealCell(12)">12</div>
+          <div id="mine13" class="mine-cell" onclick="revealCell(13)">13</div>
+          <div id="mine14" class="mine-cell" onclick="revealCell(14)">14</div>
+          <div id="mine15" class="mine-cell" onclick="revealCell(15)">15</div>
+          <div id="mine16" class="mine-cell" onclick="revealCell(16)">16</div>
+          <div id="mine17" class="mine-cell" onclick="revealCell(17)">17</div>
+          <div id="mine18" class="mine-cell" onclick="revealCell(18)">18</div>
+          <div id="mine19" class="mine-cell" onclick="revealCell(19)">19</div>
+          <div id="mine20" class="mine-cell" onclick="revealCell(20)">20</div>
+          <div id="mine21" class="mine-cell" onclick="revealCell(21)">21</div>
+          <div id="mine22" class="mine-cell" onclick="revealCell(22)">22</div>
+          <div id="mine23" class="mine-cell" onclick="revealCell(23)">23</div>
+          <div id="mine24" class="mine-cell" onclick="revealCell(24)">24</div>
+          <div id="mine25" class="mine-cell" onclick="revealCell(25)">25</div>
+        </div>
+        <div class="flex justify-between">
+          <button id="minesStartBtn" class="game-btn text-white px-6 py-2 rounded-md font-medium w-1/2 mr-2" onclick="startMines()">Bắt đầu</button>
+          <button id="minesCashoutBtn" class="game-btn text-white px-6 py-2 rounded-md font-medium w-1/2 ml-2 hidden" onclick="cashoutMines()">Rút tiền</button>
+        </div>
+        <p id="minesMultiplier" class="text-sm mt-4 text-gray-600 hidden">Hệ số nhân: 1.00x</p>
+      </div>
+
+      <div id="slotsGame" class="game-content hidden">
+        <h2 class="text-xl font-semibold mb-4">Slots</h2>
+        <p class="text-sm mb-4 text-gray-600">Quay 3 cuộn, khớp biểu tượng</p>
+        <div class="flex justify-center space-x-4 mb-4">
+          <div id="reel1" class="slot-reel">🎰</div>
+          <div id="reel2" class="slot-reel">🎰</div>
+          <div id="reel3" class="slot-reel">🎰</div>
+        </div>
+        <div class="mb-4">
+          <label for="slotsBet" class="block text-left text-sm font-medium mb-1 text-gray-700">Số tiền cược</label>
+          <input type="number" id="slotsBet" min="1" class="w-full p-2 text-gray-900 placeholder-gray-500" placeholder="Ví dụ: 10">
+        </div>
+        <div class="text-sm text-gray-600 mb-4">
+          <p>Bảng trả thưởng:</p>
+          <p>🍒🍒🍒: x3 | 🍋🍋🍋: x3 | ⭐⭐⭐: x5</p>
+        </div>
+        <button id="slotsBtn" class="game-btn text-white px-6 py-2 rounded-md font-medium w-full" onclick="playSlots()">Quay</button>
+      </div>
+    </div>
+
+    <div id="result" class="result-box hidden mt-6 p-5 text-base">
+      <p id="resultText" class="font-medium"></p>
+    </div>
+
+    <div class="mt-6">
+      <h3 class="text-lg font-semibold mb-2">Lịch sử cược</h3>
+      <ul id="betHistory" class="text-sm text-gray-600"></ul>
+    </div>
+  </div>
+
+  <footer>
+    © 2025 Simple Betting Game. All rights reserved.
+  </footer>
+
+  <script>
+    let balance = parseFloat(localStorage.getItem('balance')) || 1000;
+    let betHistory = JSON.parse(localStorage.getItem('betHistory')) || [];
+    let crashHistory = JSON.parse(localStorage.getItem('crashHistory')) || [];
+    let crashState = { active: false, bet: 0, multiplier: 1, interval: null };
+    let minesState = { active: false, bet: 0, mines: [], opened: 0 };
+    document.getElementById('balance').textContent = `Stake Coins: ${balance.toFixed(2)}`;
+    updateHistory();
+    updateCrashHistory();
+
+    function selectGame(game) {
+      document.querySelectorAll('.game-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`${game}Game`).classList.remove('hidden');
+      document.getElementById('gameArea').classList.remove('hidden');
+      document.getElementById('result').classList.add('hidden');
+      if (game !== 'crash') resetCrash();
+      if (game !== 'mines') resetMines();
+      if (game === 'crash') updateCrashHistory();
+    }
+
+    function showResult(message, colorClass, isSlots = false) {
+      const resultText = document.getElementById('resultText');
+      const resultDiv = document.getElementById('result');
+      resultText.textContent = message;
+      resultText.className = `font-medium ${colorClass}`;
+      resultDiv.classList.remove('hidden');
+      resultDiv.classList.add('show');
+      if (!isSlots) {
+        setTimeout(() => {
+          resultDiv.classList.add('hidden');
+          resultDiv.classList.remove('show');
+        }, 10000);
+      }
+    }
+
+    function updateHistory() {
+      const historyList = document.getElementById('betHistory');
+      historyList.innerHTML = '';
+      betHistory.slice(-5).forEach(bet => {
+        const li = document.createElement('li');
+        li.textContent = `${bet.game}: Cược ${bet.amount} - ${bet.result}`;
+        historyList.appendChild(li);
+      });
+      localStorage.setItem('betHistory', JSON.stringify(betHistory));
+    }
+
+    function updateCrashHistory() {
+      const crashHistoryList = document.getElementById('crashHistory');
+      crashHistoryList.innerHTML = '';
+      crashHistory.slice(-5).forEach(result => {
+        const li = document.createElement('li');
+        li.textContent = result.text;
+        li.className = result.won ? 'text-green-500' : 'text-red-500';
+        crashHistoryList.appendChild(li);
+      });
+      localStorage.setItem('crashHistory', JSON.stringify(crashHistory));
+    }
+
+    function validateBet(amount, game) {
+      if (isNaN(amount) || amount <= 0) {
+        showResult('Vui lòng nhập số tiền cược hợp lệ (số dương).', 'text-red-500');
+        return false;
+      }
+      if (amount > balance) {
+        showResult('Số dư không đủ để đặt cược.', 'text-red-500');
+        return false;
+      }
+      balance -= amount;
+      document.getElementById('balance').textContent = `Stake Coins: ${balance.toFixed(2)}`;
+      localStorage.setItem('balance', balance);
+      return true;
+    }
+
+    function startCrash() {
+      const bet = parseFloat(document.getElementById('crashBet').value);
+      if (!validateBet(bet, 'Crash')) return;
+
+      crashState = { active: true, bet, multiplier: 1, interval: null };
+      const crashStartBtn = document.getElementById('crashStartBtn');
+      const crashCashoutBtn = document.getElementById('crashCashoutBtn');
+      const crashMultiplier = document.getElementById('crashMultiplier');
+      const canvas = document.getElementById('crashGraph');
+      const ctx = canvas.getContext('2d');
+      crashStartBtn.classList.add('hidden');
+      crashCashoutBtn.classList.remove('hidden');
+      crashMultiplier.textContent = `1.00x`;
+
+      let x = 0;
+      let y = canvas.height;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height);
+      ctx.strokeStyle = '#16a34a';
+      ctx.lineWidth = 2;
+
+      crashState.interval = setInterval(() => {
+        if (!crashState.active) return;
+        const increase = 1 + Math.random() * 0.04;
+        crashState.multiplier *= increase;
+        crashState.multiplier = Math.min(crashState.multiplier, 100);
+        crashMultiplier.textContent = `${crashState.multiplier.toFixed(2)}x`;
+
+        x += 5;
+        y = canvas.height - (crashState.multiplier * 50);
+        if (y < 0) y = 0;
+        ctx.lineTo(x, y);
+        ctx.stroke();
+
+        const crashChance = Math.random() < 0.02 + (crashState.multiplier / 100);
+        if (crashChance) {
+          canvas.classList.add('crash');
+          setTimeout(() => canvas.classList.remove('crash'), 300);
+          showResult(`Vỡ tại ${crashState.multiplier.toFixed(2)}x! Bạn thua.`, 'text-red-500');
+          crashHistory.push({ text: `Vỡ ${crashState.multiplier.toFixed(2)}x`, won: false });
+          crashHistory = crashHistory.slice(-5);
+          resetCrash();
+          updateHistory();
+          updateCrashHistory();
+        }
+      }, 100);
+    }
+
+    function cashoutCrash() {
+      if (!crashState.active) return;
+      const winnings = crashState.bet * crashState.multiplier;
+      balance += winnings;
+      document.getElementById('balance').textContent = `Stake Coins: ${balance.toFixed(2)}`;
+      showResult(`Bạn rút tiền tại ${crashState.multiplier.toFixed(2)}x! Nhận ${winnings.toFixed(2)} Stake Coins.`, 'text-green-500');
+      crashHistory.push({ text: `Rút ${crashState.multiplier.toFixed(2)}x`, won: true });
+      crashHistory = crashHistory.slice(-5);
+      betHistory.push({ game: 'Crash', amount: crashState.bet.toFixed(2), result: `Rút tiền tại ${crashState.multiplier.toFixed(2)}x` });
+      resetCrash();
+      localStorage.setItem('balance', balance);
+      updateHistory();
+      updateCrashHistory();
+    }
+
+    function resetCrash() {
+      if (crashState.interval) clearInterval(crashState.interval);
+      crashState = { active: false, bet: 0, multiplier: 1, interval: null };
+      document.getElementById('crashStartBtn').classList.remove('hidden');
+      document.getElementById('crashCashoutBtn').classList.add('hidden');
+      document.getElementById('crashMultiplier').textContent = `1.00x`;
+      const canvas = document.getElementById('crashGraph');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function startMines() {
+      const bet = parseFloat(document.getElementById('minesBet').value);
+      const mineCount = parseInt(document.getElementById('minesCount').value);
+
+      if (isNaN(mineCount) || mineCount < 1 || mineCount > 24) {
+        showResult('Vui lòng nhập số mìn hợp lệ (1-24).', 'text-red-500');
+        return;
+      }
+      if (!validateBet(bet, 'Mines')) return;
+
+      minesState = { active: true, bet, mines: [], opened: 0 };
+      const minesStartBtn = document.getElementById('minesStartBtn');
+      const minesCashoutBtn = document.getElementById('minesCashoutBtn');
+      minesStartBtn.classList.add('hidden');
+      minesCashoutBtn.classList.remove('hidden');
+      document.getElementById('minesMultiplier').classList.remove('hidden');
+      document.getElementById('minesMultiplier').textContent = `Hệ số nhân: 1.00x`;
+
+      for (let i = 1; i <= 25; i++) {
+        const cell = document.getElementById(`mine${i}`);
+        cell.textContent = i;
+        cell.classList.remove('revealed', 'mine');
+        cell.onclick = () => revealCell(i);
+      }
+    }
+
+    function revealCell(cellId) {
+      if (!minesState.active) return;
+      const cell = document.getElementById(`mine${cellId}`);
+      if (cell.classList.contains('revealed')) return;
+
+      if (minesState.mines.length === 0) {
+        const mineCount = parseInt(document.getElementById('minesCount').value);
+        let available = Array.from({ length: 25 }, (_, i) => i + 1).filter(i => i !== cellId);
+        minesState.mines = [];
+        for (let i = 0; i < mineCount; i++) {
+          const index = Math.floor(Math.random() * available.length);
+          minesState.mines.push(available[index]);
+          available.splice(index, 1);
+        }
+      }
+
+      cell.classList.add('revealed');
+      if (minesState.mines.includes(cellId)) {
+        cell.classList.add('mine');
+        cell.textContent = '💣';
+        showResult(`Bạn thua! Trúng mìn tại ô ${cellId}.`, 'text-red-500');
+        betHistory.push({ game: 'Mines', amount: minesState.bet.toFixed(2), result: `Trúng mìn tại ô ${cellId}` });
+        resetMines();
+      } else {
+        cell.textContent = '💎';
+        minesState.opened++;
+        const multiplier = Math.pow(1.1, minesState.opened).toFixed(2);
+        document.getElementById('minesMultiplier').textContent = `Hệ số nhân: ${multiplier}x`;
+      }
+      updateHistory();
+    }
+
+    function cashoutMines() {
+      if (!minesState.active) return;
+      const multiplier = Math.pow(1.1, minesState.opened).toFixed(2);
+      const winnings = minesState.bet * multiplier;
+      balance += winnings;
+      document.getElementById('balance').textContent = `Stake Coins: ${balance.toFixed(2)}`;
+      showResult(`Bạn rút tiền! Hệ số nhân: ${multiplier}x. Nhận ${winnings.toFixed(2)} Stake Coins.`, 'text-green-500');
+      betHistory.push({ game: 'Mines', amount: minesState.bet.toFixed(2), result: `Rút tiền: ${winnings.toFixed(2)}` });
+      resetMines();
+      localStorage.setItem('balance', balance);
+      updateHistory();
+    }
+
+    function resetMines() {
+      minesState = { active: false, bet: 0, mines: [], opened: 0 };
+      document.getElementById('minesStartBtn').classList.remove('hidden');
+      document.getElementById('minesCashoutBtn').classList.add('hidden');
+      document.getElementById('minesMultiplier').classList.add('hidden');
+      for (let i = 1; i <= 25; i++) {
+        const cell = document.getElementById(`mine${i}`);
+        cell.textContent = i;
+        cell.classList.remove('revealed', 'mine');
+        cell.onclick = null;
+      }
+    }
+
+    function playSlots() {
+      const bet = parseFloat(document.getElementById('slotsBet').value);
+      if (!validateBet(bet, 'Slots')) return;
+
+      const slotsBtn = document.getElementById('slotsBtn');
+      slotsBtn.disabled = true;
+      const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
+      reels.forEach(reel => reel.classList.add('spinning'));
+
+      setTimeout(() => {
+        const symbols = ['🍒', '🍋', '⭐'];
+        const result = [
+          symbols[Math.floor(Math.random() * symbols.length)],
+          symbols[Math.floor(Math.random() * symbols.length)],
+          symbols[Math.floor(Math.random() * symbols.length)]
+        ];
+
+        reels[0].textContent = result[0];
+        reels[1].textContent = result[1];
+        reels[2].textContent = result[2];
+        reels.forEach(reel => reel.classList.remove('spinning'));
+
+        let resultMessage;
+        let multiplier = 0;
+        if (result[0] === result[1] && result[1] === result[2]) {
+          multiplier = result[0] === '⭐' ? 5 : 3;
+          const winnings = bet * multiplier;
+          balance += winnings;
+          resultMessage = `Bạn thắng! Kết quả: ${result.join(' ')}. Nhận ${winnings.toFixed(2)} Stake Coins.`;
+          showResult(resultMessage, 'text-green-500', true);
+        } else {
+          resultMessage = `Bạn thua! Kết quả: ${result.join(' ')}.`;
+          showResult(resultMessage, 'text-red-500', true);
+        }
+        document.getElementById('balance').textContent = `Stake Coins: ${balance.toFixed(2)}`;
+        betHistory.push({ game: 'Slots', amount: bet.toFixed(2), result: resultMessage });
+        updateHistory();
+        localStorage.setItem('balance', balance);
+        slotsBtn.disabled = false;
+      }, 500);
+    }
+  </script>
+</body>
+</html>
