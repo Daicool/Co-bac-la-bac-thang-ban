@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roulette - Simple Betting Game</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="text-white">
+  <div class="container">
+    <header class="flex justify-between items-center mb-8">
+      <div class="flex items-center space-x-4">
+        <a href="index.html" class="game-btn text-white px-3 py-1 rounded-md font-medium">← Quay lại</a>
+        <h1 class="text-2xl font-bold">Roulette</h1>
+      </div>
+      <div class="flex items-center space-x-2">
+        <div id="balance" class="text-lg font-medium bg-gray-800/80 px-4 py-2 rounded-md border border-white/20 shadow-md">Stake Coins: 1000</div>
+        <button id="addBalanceBtn" class="game-btn text-white px-3 py-1 rounded-md font-medium hidden" onclick="openBalanceModal()">Nạp số dư</button>
+      </div>
+    </header>
+
+    <main class="card p-6">
+      <p class="text-sm mb-4 text-gray-300">Đặt cược vào số, màu, hoặc chẵn/lẻ, quay bánh xe để thắng!</p>
+      <div class="mb-4">
+        <label for="rouletteBet" class="block text-left text-sm font-medium mb-1 text-gray-300">Số tiền cược</label>
+        <input type="number" id="rouletteBet" min="1" class="w-full p-2 placeholder-gray-500" placeholder="Ví dụ: 10">
+      </div>
+      <div class="mb-4">
+        <label for="rouletteType" class="block text-left text-sm font-medium mb-1 text-gray-300">Loại cược</label>
+        <select id="rouletteType" class="w-full p-2 text-gray-300">
+          <option value="number">Số cụ thể</option>
+          <option value="color">Màu (Đỏ/Đen)</option>
+          <option value="evenOdd">Chẵn/Lẻ</option>
+        </select>
+      </div>
+      <div id="numberSelect" class="mb-4">
+        <label for="rouletteNumber" class="block text-left text-sm font-medium mb-1 text-gray-300">Chọn số (0-36)</label>
+        <input type="number" id="rouletteNumber" min="0" max="36" class="w-full p-2 placeholder-gray-500" placeholder="Ví dụ: 7">
+      </div>
+      <div id="colorSelect" class="mb-4 hidden">
+        <label for="rouletteColor" class="block text-left text-sm font-medium mb-1 text-gray-300">Chọn màu</label>
+        <select id="rouletteColor" class="w-full p-2 text-gray-300">
+          <option value="red">Đỏ</option>
+          <option value="black">Đen</option>
+        </select>
+      </div>
+      <div id="evenOddSelect" class="mb-4 hidden">
+        <label for="rouletteEvenOdd" class="block text-left text-sm font-medium mb-1 text-gray-300">Chọn chẵn/lẻ</label>
+        <select id="rouletteEvenOdd" class="w-full p-2 text-gray-300">
+          <option value="even">Chẵn</option>
+          <option value="odd">Lẻ</option>
+        </select>
+      </div>
+      <canvas id="rouletteWheel" width="350" height="350" class="mb-4 mx-auto"></canvas>
+      <button id="rouletteBtn" class="game-btn text-white px-6 py-2 rounded-md font-medium w-full" onclick="playRoulette()">Quay</button>
+      <div id="result" class="result-box hidden mt-6 p-5 text-base">
+        <p id="resultText" class="font-medium"></p>
+      </div>
+      <div class="mt-6 bet-history">
+        <h3 class="text-lg font-semibold mb-2">Lịch sử cược</h3>
+        <ul id="betHistory" class="text-sm text-gray-300"></ul>
+      </div>
+    </main>
+
+    <div id="balanceModal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden">
+      <div class="modal p-6 w-80">
+        <h3 class="text-lg font-semibold mb-4">Nạp số dư</h3>
+        <input type="number" id="newBalance" min="1" class="w-full p-2 mb-4 placeholder-gray-500" placeholder="Nhập số dư mới">
+        <div class="flex justify-between">
+          <button class="game-btn text-white px-4 py-2 rounded-md font-medium" onclick="updateBalance()">Xác nhận</button>
+          <button class="bg-gray-600 text-white px-4 py-2 rounded-md font-medium" onclick="closeBalanceModal()">Hủy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    © 2025 Simple Betting Game. All rights reserved.
+  </footer>
+
+  <script src="script.js"></script>
+  <script>
+    let rouletteState = { spinning: false };
+    document.getElementById('rouletteType').addEventListener('change', function() {
+      const type = this.value;
+      document.getElementById('numberSelect').classList.toggle('hidden', type !== 'number');
+      document.getElementById('colorSelect').classList.toggle('hidden', type !== 'color');
+      document.getElementById('evenOddSelect').classList.toggle('hidden', type !== 'evenOdd');
+    });
+    drawRouletteWheel(0);
+    updateHistory('Roulette');
+  </script>
+</body>
+</html>
