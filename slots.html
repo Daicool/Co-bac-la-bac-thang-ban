@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slots - Simple Betting Game</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="text-white">
+  <div class="container">
+    <header class="flex justify-between items-center mb-8">
+      <div class="flex items-center space-x-4">
+        <a href="index.html" class="game-btn text-white px-3 py-1 rounded-md font-medium">← Quay lại</a>
+        <h1 class="text-2xl font-bold">Slots</h1>
+      </div>
+      <div class="flex items-center space-x-2">
+        <div id="balance" class="text-lg font-medium bg-gray-800/80 px-4 py-2 rounded-md border border-white/20 shadow-md">Stake Coins: 1000</div>
+        <button id="addBalanceBtn" class="game-btn text-white px-3 py-1 rounded-md font-medium hidden" onclick="openBalanceModal()">Nạp số dư</button>
+      </div>
+    </header>
+
+    <main class="card p-6">
+      <p class="text-sm mb-4 text-gray-300">Quay hũ 5x3, khớp dòng hoặc scatter để thắng!</p>
+      <div class="grid grid-cols-5 gap-2 mb-4">
+        <div id="slot1" class="slot-reel">🎰</div>
+        <div id="slot2" class="slot-reel">🎰</div>
+        <div id="slot3" class="slot-reel">🎰</div>
+        <div id="slot4" class="slot-reel">🎰</div>
+        <div id="slot5" class="slot-reel">🎰</div>
+        <div id="slot6" class="slot-reel">🎰</div>
+        <div id="slot7" class="slot-reel">🎰</div>
+        <div id="slot8" class="slot-reel">🎰</div>
+        <div id="slot9" class="slot-reel">🎰</div>
+        <div id="slot10" class="slot-reel">🎰</div>
+        <div id="slot11" class="slot-reel">🎰</div>
+        <div id="slot12" class="slot-reel">🎰</div>
+        <div id="slot13" class="slot-reel">🎰</div>
+        <div id="slot14" class="slot-reel">🎰</div>
+        <div id="slot15" class="slot-reel">🎰</div>
+      </div>
+      <div class="mb-4">
+        <label for="slotsBet" class="block text-left text-sm font-medium mb-1 text-gray-300">Số tiền cược</label>
+        <input type="number" id="slotsBet" min="1" class="w-full p-2 placeholder-gray-500" placeholder="Ví dụ: 10">
+      </div>
+      <div class="text-sm text-gray-300 mb-4">
+        <p>Bảng trả thưởng:</p>
+        <p>3 biểu tượng: 🍒/🍋 x1.5, 🔔 x2, ⭐ x3, 💎 x5</p>
+        <p>4 biểu tượng: 🍒/🍋 x3, 🔔 x5, ⭐ x7, 💎 x10</p>
+        <p>5 biểu tượng: 🍒/🍋 x7, 🔔 x10, ⭐ x15, 💎 x30</p>
+        <p>Scatter 🌌: 3 (5 lượt miễn phí), 4 (10 lượt), 5 (15 lượt)</p>
+      </div>
+      <button id="slotsBtn" class="game-btn text-white px-6 py-2 rounded-md font-medium w-full" onclick="playSlots()">Quay</button>
+      <div id="result" class="result-box hidden mt-6 p-5 text-base">
+        <p id="resultText" class="font-medium"></p>
+      </div>
+      <div class="mt-6 bet-history">
+        <h3 class="text-lg font-semibold mb-2">Lịch sử cược</h3>
+        <ul id="betHistory" class="text-sm text-gray-300"></ul>
+      </div>
+    </main>
+
+    <div id="balanceModal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden">
+      <div class="modal p-6 w-80">
+        <h3 class="text-lg font-semibold mb-4">Nạp số dư</h3>
+        <input type="number" id="newBalance" min="1" class="w-full p-2 mb-4 placeholder-gray-500" placeholder="Nhập số dư mới">
+        <div class="flex justify-between">
+          <button class="game-btn text-white px-4 py-2 rounded-md font-medium" onclick="updateBalance()">Xác nhận</button>
+          <button class="bg-gray-600 text-white px-4 py-2 rounded-md font-medium" onclick="closeBalanceModal()">Hủy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    © 2025 Simple Betting Game. All rights reserved.
+  </footer>
+
+  <script src="script.js"></script>
+  <script>
+    let slotsState = { freeSpins: 0, freeSpinBet: 0 };
+    updateHistory('Slots');
+  </script>
+</body>
+</html>
