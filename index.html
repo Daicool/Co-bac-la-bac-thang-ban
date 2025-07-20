@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simple Betting Game</title>
+  <title>CỜ BACK</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
@@ -187,9 +187,9 @@
 <body class="text-white">
   <div id="mainPage" class="max-w-5xl w-full mx-auto text-center p-6">
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-3.5xl font-bold">Simple Betting Game</h1>
+      <h1 class="text-3.5xl font-bold">CỜ BẠC MẠNG</h1>
       <div class="flex items-center space-x-2">
-        <div id="balance" class="text-lg font-medium bg-gray-800/80 px-4 py-2 rounded-md border border-white/20 shadow-md">Stake Coins: 1000</div>
+        <div id="balance" class="text-lg font-medium bg-gray-800/80 px-4 py-2 rounded-md border border-white/20 shadow-md">Coins: 1000</div>
         <button id="addBalanceBtn" class="game-btn text-white px-3 py-1 rounded-md font-medium hidden" onclick="openBalanceModal()">Nạp số dư</button>
       </div>
     </div>
@@ -217,7 +217,7 @@
     <div class="flex justify-between items-center mb-6">
       <button class="game-btn text-white px-4 py-2 rounded-md font-medium" onclick="backToMain()">Quay lại</button>
       <div class="flex items-center space-x-2">
-        <div id="gameBalance" class="text-lg font-medium bg-gray-800/80 px-4 py-2 rounded-md border border-white/20 shadow-md">Stake Coins: 1000</div>
+        <div id="gameBalance" class="text-lg font-medium bg-gray-800/80 px-4 py-2 rounded-md border border-white/20 shadow-md">Coins: 1000</div>
         <button id="gameAddBalanceBtn" class="game-btn text-white px-3 py-1 rounded-md font-medium hidden" onclick="openBalanceModal()">Nạp số dư</button>
       </div>
     </div>
@@ -372,7 +372,7 @@
   </div>
 
   <footer>
-    © 2025 Simple Betting Game. All rights reserved.
+    © 2025 PHÁT ĐẠI. All rights reserved.
   </footer>
 
   <script>
@@ -381,8 +381,8 @@
     let minesState = { active: false, bet: 0, mines: [], opened: 0 };
     let slotsState = { freeSpins: 0, freeSpinBet: 0 };
     let rouletteState = { spinning: false };
-    document.getElementById('balance').textContent = `Stake Coins: ${balance.toFixed(2)}`;
-    document.getElementById('gameBalance').textContent = `Stake Coins: ${balance.toFixed(2)}`;
+    document.getElementById('balance').textContent = `Coins: ${balance.toFixed(2)}`;
+    document.getElementById('gameBalance').textContent = `Coins: ${balance.toFixed(2)}`;
     updateHistory('roulette');
     updateHistory('mines');
     updateHistory('slots');
@@ -462,8 +462,8 @@
         return;
       }
       balance = newBalance;
-      document.getElementById('balance').textContent = `Stake Coins: ${balance.toFixed(2)}`;
-      document.getElementById('gameBalance').textContent = `Stake Coins: ${balance.toFixed(2)}`;
+      document.getElementById('balance').textContent = `Coins: ${balance.toFixed(2)}`;
+      document.getElementById('gameBalance').textContent = `Coins: ${balance.toFixed(2)}`;
       localStorage.setItem('balance', balance);
       closeBalanceModal();
       checkBalance();
@@ -480,8 +480,8 @@
       }
       if (slotsState.freeSpins === 0) {
         balance -= amount;
-        document.getElementById('balance').textContent = `Stake Coins: ${balance.toFixed(2)}`;
-        document.getElementById('gameBalance').textContent = `Stake Coins: ${balance.toFixed(2)}`;
+        document.getElementById('balance').textContent = `Coins: ${balance.toFixed(2)}`;
+        document.getElementById('gameBalance').textContent = `Coins: ${balance.toFixed(2)}`;
         localStorage.setItem('balance', balance);
       }
       checkBalance();
@@ -577,24 +577,24 @@
           if (type === 'number' && choice === resultNumber) {
             winnings = bet * 36;
             balance += winnings;
-            resultMessage = `Bạn thắng! Kết quả: ${resultNumber} (${resultColor}). Nhận ${winnings.toFixed(2)} Stake Coins.`;
+            resultMessage = `Bạn thắng! Kết quả: ${resultNumber} (${resultColor}). Nhận ${winnings.toFixed(2)} Coins.`;
             showResult('roulette', resultMessage, 'text-white', true);
           } else if (type === 'color' && choice === resultColor) {
             winnings = bet * 2;
             balance += winnings;
-            resultMessage = `Bạn thắng! Kết quả: ${resultNumber} (${resultColor}). Nhận ${winnings.toFixed(2)} Stake Coins.`;
+            resultMessage = `Bạn thắng! Kết quả: ${resultNumber} (${resultColor}). Nhận ${winnings.toFixed(2)} Coins.`;
             showResult('roulette', resultMessage, 'text-white', true);
           } else if (type === 'evenOdd' && ((choice === 'even' && isEven) || (choice === 'odd' && !isEven && resultNumber !== 0))) {
             winnings = bet * 2;
             balance += winnings;
-            resultMessage = `Bạn thắng! Kết quả: ${resultNumber} (${resultColor}). Nhận ${winnings.toFixed(2)} Stake Coins.`;
+            resultMessage = `Bạn thắng! Kết quả: ${resultNumber} (${resultColor}). Nhận ${winnings.toFixed(2)} Coins.`;
             showResult('roulette', resultMessage, 'text-white', true);
           } else {
             resultMessage = `Bạn thua! Kết quả: ${resultNumber} (${resultColor}).`;
             showResult('roulette', resultMessage, 'text-red-500', true);
           }
-          document.getElementById('balance').textContent = `Stake Coins: ${balance.toFixed(2)}`;
-          document.getElementById('gameBalance').textContent = `Stake Coins: ${balance.toFixed(2)}`;
+          document.getElementById('balance').textContent = `Coins: ${balance.toFixed(2)}`;
+          document.getElementById('gameBalance').textContent = `Coins: ${balance.toFixed(2)}`;
           betHistory.push({ game: 'Roulette', amount: bet.toFixed(2), result: resultMessage });
           updateHistory('roulette');
           localStorage.setItem('balance', balance);
@@ -668,9 +668,9 @@
       const multiplier = Math.pow(1.1, minesState.opened).toFixed(2);
       const winnings = minesState.bet * multiplier;
       balance += winnings;
-      document.getElementById('balance').textContent = `Stake Coins: ${balance.toFixed(2)}`;
-      document.getElementById('gameBalance').textContent = `Stake Coins: ${balance.toFixed(2)}`;
-      showResult('mines', `Bạn rút tiền! Hệ số nhân: ${multiplier}x. Nhận ${winnings.toFixed(2)} Stake Coins.`, 'text-white');
+      document.getElementById('balance').textContent = `Coins: ${balance.toFixed(2)}`;
+      document.getElementById('gameBalance').textContent = `Coins: ${balance.toFixed(2)}`;
+      showResult('mines', `Bạn rút tiền! Hệ số nhân: ${multiplier}x. Nhận ${winnings.toFixed(2)} Coins.`, 'text-white');
       betHistory.push({ game: 'Mines', amount: minesState.bet.toFixed(2), result: `Rút tiền: ${winnings.toFixed(2)}` });
       resetMines();
       localStorage.setItem('balance', balance);
@@ -778,7 +778,7 @@
           slotsState.freeSpins--;
           if (totalWinnings > 0) {
             balance += totalWinnings;
-            resultMessage = `Vòng quay miễn phí: ${slotsState.freeSpins} lượt còn lại. Thắng: Dòng ${winningLines.join(', ')}. Nhận ${totalWinnings.toFixed(2)} Stake Coins.`;
+            resultMessage = `Vòng quay miễn phí: ${slotsState.freeSpins} lượt còn lại. Thắng: Dòng ${winningLines.join(', ')}. Nhận ${totalWinnings.toFixed(2)} Coins.`;
             showResult('slots', resultMessage, 'text-white', true);
           } else {
             resultMessage = `Vòng quay miễn phí: ${slotsState.freeSpins} lượt còn lại. Không thắng.`;
@@ -792,7 +792,7 @@
         } else {
           if (totalWinnings > 0) {
             balance += totalWinnings;
-            resultMessage = `Bạn thắng! Dòng thắng: ${winningLines.join(', ')}. Nhận ${totalWinnings.toFixed(2)} Stake Coins.`;
+            resultMessage = `Bạn thắng! Dòng thắng: ${winningLines.join(', ')}. Nhận ${totalWinnings.toFixed(2)} Coins.`;
             showResult('slots', resultMessage, 'text-white', true);
           } else {
             resultMessage = `Bạn thua! Kết quả: Không có dòng thắng.`;
@@ -805,8 +805,8 @@
           betHistory.push({ game: 'Slots', amount: bet.toFixed(2), result: resultMessage });
         }
 
-        document.getElementById('balance').textContent = `Stake Coins: ${balance.toFixed(2)}`;
-        document.getElementById('gameBalance').textContent = `Stake Coins: ${balance.toFixed(2)}`;
+        document.getElementById('balance').textContent = `Coins: ${balance.toFixed(2)}`;
+        document.getElementById('gameBalance').textContent = `Coins: ${balance.toFixed(2)}`;
         updateHistory('slots');
         localStorage.setItem('balance', balance);
         slotsBtn.disabled = false;
